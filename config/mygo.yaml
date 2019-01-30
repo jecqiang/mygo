@@ -1,0 +1,10 @@
+# 端口
+httpPort: 8088
+# mysql配置
+mysql:
+  host: 127.0.0.1
+  port: 3306
+  user: root
+  password:
+  database: demo
+  character: utf8mb4
