@@ -1,3 +1,5 @@
+// +build dev
+
 package main
 
 import (
@@ -36,11 +38,11 @@ func init() {
 
 func main() {
 	var (
-		gopath  string
-		args    []string
-		environ []string
-		cmd     *exec.Cmd
-		err     error
+		gopath string
+		args   []string
+		env    []string
+		cmd    *exec.Cmd
+		err    error
 	)
 	flag.Parse()
 	gopath = os.Getenv("GOPATH")
@@ -53,16 +55,16 @@ func main() {
 		args = append(args, "-race")
 	}
 
-	environ = os.Environ()
-	environ = append(environ, "GOOS="+goos, "GOARCH="+goarch, "GOARM="+goarm)
+	env = os.Environ()
+	env = append(env, "GOOS="+goos, "GOARCH="+goarch, "GOARM="+goarm)
 	if !race {
-		environ = append(environ, "CGO_ENABLED=0")
+		env = append(env, "CGO_ENABLED=0")
 	}
 
 	cmd = exec.Command("go", args...)
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
-	cmd.Env = environ
+	cmd.Env = env
 	err = cmd.Run()
 	if err != nil {
 		log.Fatal(err)
