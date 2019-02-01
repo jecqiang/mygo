@@ -1,5 +1,16 @@
-# 端口
-httpPort: 8088
+# web 服务配置
+serve:
+  port: 8088
+  read_timeout: 300
+  write_timeout: 300
+  idle_timeout: 300
+# 日志输出配置
+#   stdout - 打印到标准输出
+#   /path/file - 输出到文件
+# level 0输出所有，1 debug, 2 info, 3 error, 4 panic
+log:
+  path: stdout
+  level: 1
 # mysql配置
 mysql:
   host: 127.0.0.1
@@ -8,3 +19,12 @@ mysql:
   password:
   database: demo
   character: utf8mb4
+# 邮件配置
+smtp:
+  # 是否开启邮件发送功能 0-关闭；1-开启
+  enable: 1
+  # 邮件smtp配置
+  host: smtp.qq.com
+  port: 587
+  user: 282109128@qq.com
+  pass: mezjerkluqzocaec

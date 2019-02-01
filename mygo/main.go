@@ -6,13 +6,14 @@ import (
 	"runtime"
 	"os"
 	"github.com/jecqiang/mygo"
-	"github.com/dreamans/syncd"
+	"log"
 )
 
 var (
 	help       bool   //启动帮助
 	configFile string //配置文件路径
 	version    bool   //是否查看版本
+	logFile    string
 )
 
 //初始化
@@ -27,20 +28,42 @@ func init() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 }
 
-func welcome() {
-	fmt.Println(" _ __ ___   _   _   __ _   ___")
-	fmt.Println("| '_ ` _ \\ | | | | / _` | / _ \\")
-	fmt.Println("| | | | | || |_| || (_| || (_) |")
-	fmt.Println("|_| |_| |_| \\__, | \\__, | \\___/")
-	fmt.Println("			 __/ |  __/ |")
-	fmt.Println("			|___/  |___/")
-	fmt.Println("")
-	outputInfo("Service", "mygo")
-	outputInfo("Version", syncd.VERSION)
+func outputInfo(tag string, value interface{}) {
+	fmt.Printf("%-18s    %v\n", tag+":", value)
 }
 
-func outputInfo(tag string, value interface{}) {
-	fmt.Printf("%-18s    %v\n", tag + ":", value)
+func run()  {
+	var (
+		err error
+		f *os.File
+	)
+	outputInfo("Service", "mygo")
+	outputInfo("Version", mygo.VERSION)
+	//初始化配置
+	err = mygo.InitConfig(configFile)
+	if err != nil {
+		panic(err)
+	}
+	outputInfo("Config Loaded", configFile)
+
+	//设置logger
+	if mygo.G_config.Log.Path != "" && mygo.G_config.Log.Path != "stdout" {
+		f, err = os.OpenFile(mygo.G_config.Log.Path, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+		if err != nil {
+			panic(err)
+		}
+		defer f.Close()
+		log.SetOutput(f)
+	}
+	outputInfo("Log", mygo.G_config.Log.Path)
+
+	mg := mygo.NewMygo()
+	mg.RegisterMail()
+	mg.RegisterDb()
+	defer mygo.Db.Close()
+
+	fmt.Println("Start Running...")
+
 }
 
 func main() {
@@ -52,20 +75,5 @@ func main() {
 		fmt.Printf("mygo/%s\n", mygo.VERSION)
 		os.Exit(0)
 	}
-	var(
-		err error
-	)
-	welcome()
-
-	//初始化配置
-	err = mygo.InitConfig(configFile)
-	if err != nil {
-		goto ERR
-	}
-
-	fmt.Println("Start Running...")
-
-	return
-ERR:
-	fmt.Println(err)
+	run()
 }
